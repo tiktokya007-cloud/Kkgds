@@ -62,6 +62,7 @@ def save_current_state(state):
 
 def check_ftp():
   print(f"Connecting to FTP server: {FTP_HOST}...")
+  print(f"DEBUG: Trying to connect to host: '{FTP_HOST}'") # הוסף שורה זו
   ftp = FTP(FTP_HOST)
   ftp.login(user=FTP_USER, passwd=FTP_PASS)
   ftp.cwd(FTP_DIR)
