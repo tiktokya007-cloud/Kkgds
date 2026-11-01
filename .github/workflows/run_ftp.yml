@@ -1,0 +1,51 @@
+name: Monitor FTP and Notify Pushover
+
+on:
+  schedule:
+    - cron: '0 * * * *' # רץ אוטומטית בכל שעה עגולה (לפי שעון UTC)
+  workflow_dispatch: # מאפשר לך להפעיל גם ידנית לבדיקה בכל רגע
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. שליפת הקוד מהרפוזיטורי
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    # 2. התקנת פייתון
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    # 3. התקנת ספריית requests לצורך שליחה ל-Pushover
+    - name: Install dependencies
+      run: pip install requests
+
+    # 4. שחזור קובץ המצב הקודם מה-Cache של GitHub
+    - name: Restore FTP Snapshot Cache
+      uses: actions/cache@v4
+      with:
+        path: ftp_snapshot.txt
+        key: ftp-snapshot-${{ github.run_id }} # מפתח זמני ייחודי לריצה
+        restore-keys: |
+          ftp-snapshot-
+
+    # 5. הרצת קוד הפייתון עם משתני הסביבה המאובטחים
+    - name: Run Monitor Script
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USER: ${{ secrets.FTP_USER }}   # השאר ריק ב-Secrets אם אין צורך
+        FTP_PASS: ${{ secrets.FTP_PASS }}   # השאר ריק ב-Secrets אם אין צורך
+        PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+        PUSHOVER_API_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
+      run: python main.py
+
+    # 6. שמירת קובץ המצב המעודכן בחזרה ל-Cache בשביל הריצה הבאה
+    - name: Save Updated FTP Snapshot to Cache
+      uses: actions/cache/save@v4
+      with:
+        path: ftp_snapshot.txt
+        key: ftp-snapshot-${{ github.run_id }}
