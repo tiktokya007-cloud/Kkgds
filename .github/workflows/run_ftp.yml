@@ -1,0 +1,29 @@
+name: Run FTP Connection
+
+# הגדרת הטריגרים להפעלה
+on:
+  workflow_dispatch: # מאפשר לך להפעיל את הקוד ידנית בלחיצת כפתור
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. שליפת הקוד מהרפוזיטורי
+    - name: Checkout repository code
+      uses: actions/checkout@v4
+
+    # 2. התקנת פייתון על השרת של גבי GitHub
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    # 3. הרצת קובץ הפייתון והזרקת ה-Secrets כמשתני סביבה
+    - name: Execute Python Script
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        # אם יש לך משתמש וסיסמה, תוכל להוסיף אותם כאן:
+        # FTP_USER: ${{ secrets.FTP_USER }}
+        # FTP_PASS: ${{ secrets.FTP_PASS }}
+      run: python main.py
