@@ -3,7 +3,7 @@ name: FTP Folder Monitor
 on:
   schedule:
     # מריץ את הסקריפט בכל שעה עגולה (לפי שעון UTC)
-    - cron: '0 * * * *'
+    - cron: '*/2 * * * *'
   workflow_dispatch: # מאפשר לך להריץ את הסקריפט ידנית בלחיצת כפתור
 
 permissions:
