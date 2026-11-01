@@ -27,6 +27,8 @@ jobs:
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
         run: |
+        echo "Debugging FTP_HOST length and value check:"
+          python -c "import os; host = os.environ.get('FTP_HOST', ''); print(f'Host is set: {bool(host)}, Length: {len(host)}, Value preview: {host[:3]}***')"
           python ftp_monitor.py
 
       - name: Commit and push state changes (if any)
