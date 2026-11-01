@@ -3,7 +3,7 @@ name: FTP Monitor
 on:
   schedule:
     # מריץ את הבדיקה כל שעה (ניתן לשנות לפי הצורך, למשל '*/30 * * * *' לכל חצי שעה)
-    - cron: '0 * * * *'
+    - cron: '*/2 * * * *'
   workflow_dispatch: # מאפשר הפעלה ידנית מתוך ממשק ה-GitHub
 
 jobs:
