@@ -1,0 +1,55 @@
+name: FTP Folder Monitor
+
+on:
+  schedule:
+    # מריץ את הסקריפט בכל שעה עגולה (לפי שעון UTC)
+    - cron: '*/2 * * * *'
+  workflow_dispatch: # מאפשר לך להריץ את הסקריפט ידנית בלחיצת כפתור
+
+permissions:
+  contents: write # נותן ל-GitHub Actions הרשאה לעדכן את קובץ המצב ב-Repository
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. מוריד את הקוד מה-Repository לענן של GitHub
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. מגדיר את סביבת הפייתון
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python_version: '3.10'
+
+    # 3. מתקין את הספרייה requests (הספריות האחרות מובנות בפייתון)
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    # 4. מריץ את סקריפט הפייתון ומעביר לו את ה-Secrets כמשתני סביבה
+    - name: Run FTP Monitor
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USER: ${{ secrets.FTP_USER }}
+        FTP_PASS: ${{ secrets.FTP_PASS }}
+        FTP_FOLDER: "/" # שנה לתיקייה הספציפית במידת הצורך
+        PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+        PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+      run: python monitor.py # ודא ששם קובץ הפייתון שלך הוא בדיוק monitor.py
+
+    # 5. שומר את השינויים בקובץ previous_files.txt ומעלה אותם חזרה ל-Repository
+    - name: Commit and Push changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@://github.com"
+        
+        # בודק אם קובץ ה-Snapshot השתנה או נוצר לראשונה
+        if [ -f previous_files.txt ]; then
+          git add previous_files.txt
+          # מבצע קומיט רק אם יש שינוי אמיתי בקובץ
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 עדכון אוטומטי של קובץ מצב ה-FTP" && git push)
+        fi
