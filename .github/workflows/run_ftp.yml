@@ -26,7 +26,7 @@ jobs:
 
     # 4. שחזור קובץ המצב הקודם מה-Cache (שימוש במפתח קבוע)
     - name: Restore FTP Snapshot Cache
-      uses: actions/cache/restore@v4
+      uses: actions/cache/restore@v4.2.0
       id: cache-restore
       with:
         path: ftp_snapshot.txt
