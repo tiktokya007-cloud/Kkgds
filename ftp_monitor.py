@@ -84,7 +84,7 @@ def check_ftp():
     # גיבוי במידה ו-MLSD לא נתמך בשרת
     print("MLSD not supported, falling back to basic directory listing...")
     lines = []
-    ftp.retrlines("LIST", lines.။append if hasattr(lines, "append") else None)
+    ftp.retrlines("LIST", lines.။append if hasattr(lines, 'append') else None)
     # לצורך פשטות בסיסית אם אין MLSD, נשתמש במידע בסיסי
     for line in lines:
       parts = line.split()
