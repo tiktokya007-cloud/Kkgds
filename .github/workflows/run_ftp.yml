@@ -12,13 +12,13 @@ jobs:
     steps:
     # 1. שליפת הקוד מהרפוזיטורי
     - name: Checkout repository code
-      uses: actions/checkout@v4.2.2
+      uses: actions/checkout@v4
 
     # 2. התקנת פייתון
     - name: Set up Python
-      uses: actions/setup-python@v5.3.0
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     # 3. התקנת ספריית requests
     - name: Install dependencies
@@ -26,7 +26,7 @@ jobs:
 
     # 4. שחזור קובץ המצב הקודם מה-Cache (שימוש במפתח קבוע)
     - name: Restore FTP Snapshot Cache
-      uses: actions/cache/restore@v4.2.0
+      uses: actions/cache/restore@v4
       id: cache-restore
       with:
         path: ftp_snapshot.txt
@@ -48,7 +48,7 @@ jobs:
 
     # 7. שמירת קובץ המצב המעודכן (מחיקת ה-Cache הישן ושמירת החדש תחת אותו מפתח)
     - name: Save Updated FTP Snapshot to Cache
-      uses: actions/cache/save@v4.2.0
+      uses: actions/cache/save@v4
       with:
         path: ftp_snapshot.txt
         key: ftp-snapshot-v1-${{ github.run_number }} # משתמש במספר הריצה כדי לאלץ שמירה מעודכנת
