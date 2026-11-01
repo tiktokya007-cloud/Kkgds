@@ -39,7 +39,7 @@ jobs:
         FTP_FOLDER: "/" # שנה לתיקייה הספציפית במידת הצורך
         PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
         PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
-      run: python .gitHub/workflows/monitor.py # ודא ששם קובץ הפייתון שלך הוא בדיוק monitor.py
+      run: python .github/workflows/monitor.py # ודא ששם קובץ הפייתון שלך הוא בדיוק monitor.py
 
     # 5. שומר את השינויים בקובץ previous_files.txt ומעלה אותם חזרה ל-Repository
     - name: Commit and Push changes
