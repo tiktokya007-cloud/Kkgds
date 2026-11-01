@@ -1,0 +1,42 @@
+name: FTP Change Detector
+
+on:
+  schedule:
+    # רץ בכל שעה עגולה. שנה לפי הצורך (למשל '*/15 * * * *' לכל 15 דקות)
+    - cron: '0 * * * *'
+  workflow_dispatch: # מאפשר הפעלה ידנית מתוך ממשק GitHub
+
+jobs:
+  check-ftp:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Run FTP checker
+      env:
+        FTP_HOST: ${{ secrets.FTP_HOST }}
+        FTP_USER: ${{ secrets.FTP_USER }}
+        FTP_PASS: ${{ secrets.FTP_PASS }}
+        PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
+        PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
+      run: python check_ftp.py
+
+    - name: Commit and push state changes
+      run: |
+        git config --local user.email "github-actions[bot]@://github.com"
+        git config --local user.name "github-actions[bot]"
+        git add ftp_state.txt
+        # מבצע Commit רק אם קובץ המצב השתנה
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update FTP state" && git push)
