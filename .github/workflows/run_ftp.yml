@@ -2,8 +2,8 @@ name: Monitor FTP and Notify Pushover
 
 on:
   schedule:
-    - cron: '0 * * * *' # רץ אוטומטית בכל שעה עגולה (לפי שעון UTC)
-  workflow_dispatch: # מאפשר לך להפעיל גם ידנית לבדיקה בכל רגע
+    - cron: '0 * * * *' # רץ אוטומטית בכל שעה עגולה
+  workflow_dispatch: # הפעלה ידנית לבדיקה
 
 jobs:
   monitor:
@@ -20,32 +20,35 @@ jobs:
       with:
         python-version: '3.x'
 
-    # 3. התקנת ספריית requests לצורך שליחה ל-Pushover
+    # 3. התקנת ספריית requests
     - name: Install dependencies
       run: pip install requests
 
-    # 4. שחזור קובץ המצב הקודם מה-Cache של GitHub
+    # 4. שחזור קובץ המצב הקודם מה-Cache (שימוש במפתח קבוע)
     - name: Restore FTP Snapshot Cache
-      uses: actions/cache@v4
+      uses: actions/cache/restore@v4
+      id: cache-restore
       with:
         path: ftp_snapshot.txt
-        key: ftp-snapshot-${{ github.run_id }} # מפתח זמני ייחודי לריצה
-        restore-keys: |
-          ftp-snapshot-
+        key: ftp-snapshot-v1 # מפתח קבוע כדי לשלוף תמיד את המצב האחרון שנשמר
 
-    # 5. הרצת קוד הפייתון עם משתני הסביבה המאובטחים
+    # 5. הרצת קוד הפייתון
     - name: Run Monitor Script
       env:
         FTP_HOST: ${{ secrets.FTP_HOST }}
-        FTP_USER: ${{ secrets.FTP_USER }}   # השאר ריק ב-Secrets אם אין צורך
-        FTP_PASS: ${{ secrets.FTP_PASS }}   # השאר ריק ב-Secrets אם אין צורך
+        FTP_USER: ${{ secrets.FTP_USER }}
+        FTP_PASS: ${{ secrets.FTP_PASS }}
         PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
         PUSHOVER_API_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
       run: python main.py
 
-    # 6. שמירת קובץ המצב המעודכן בחזרה ל-Cache בשביל הריצה הבאה
+    # 6. בדיקה האם הקובץ קיים, ואם לא - יצירת קובץ ריק כדי למנוע את שגיאת ה-Cache
+    - name: Ensure Snapshot File Exists
+      run: touch ftp_snapshot.txt
+
+    # 7. שמירת קובץ המצב המעודכן (מחיקת ה-Cache הישן ושמירת החדש תחת אותו מפתח)
     - name: Save Updated FTP Snapshot to Cache
       uses: actions/cache/save@v4
       with:
         path: ftp_snapshot.txt
-        key: ftp-snapshot-${{ github.run_id }}
+        key: ftp-snapshot-v1-${{ github.run_number }} # משתמש במספר הריצה כדי לאלץ שמירה מעודכנת
