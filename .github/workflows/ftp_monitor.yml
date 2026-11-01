@@ -13,18 +13,6 @@ jobs:
   monitor:
     runs-on: ubuntu-latest
 
-steps:
-  - name: Check out repository code
-    uses: actions/checkout@v4
-
-  - name: Set up Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: '3.x'
-
-  - name: Run Monitor Script
-    run: python .github/workflows/monitor.py
-
     steps:
     # 1. מוריד את הקוד מה-Repository לענן של GitHub
     - name: Checkout repository
@@ -51,7 +39,7 @@ steps:
         FTP_FOLDER: "/" # שנה לתיקייה הספציפית במידת הצורך
         PUSHOVER_USER: ${{ secrets.PUSHOVER_USER }}
         PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
-      run: python monitor.py # ודא ששם קובץ הפייתון שלך הוא בדיוק monitor.py
+      run: python .github/workflows/monitor.py # ודא ששם קובץ הפייתון שלך הוא בדיוק monitor.py
 
     # 5. שומר את השינויים בקובץ previous_files.txt ומעלה אותם חזרה ל-Repository
     - name: Commit and Push changes
