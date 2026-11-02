@@ -2,7 +2,7 @@ name: FTP Monitor10
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # רץ כל 10 דקות (או לפי מה שהגדרת)
+    - cron: '*/2 * * * *' # רץ כל 10 דקות (או לפי מה שהגדרת)
   workflow_dispatch:
 
 jobs:
