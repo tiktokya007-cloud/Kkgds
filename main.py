@@ -63,7 +63,7 @@ def main():
             continue
             
         if filename not in seen_files:
-            print( נמצא קובץ חדש: {filename})
+            print(f"נמצא קובץ חדש: {filename}")
             # שליחת התראה
             send_pushover_notification(filename)
             # הוספה לרשימת הנצפים
