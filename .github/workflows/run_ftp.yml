@@ -34,8 +34,7 @@ jobs:
 
     # 5. הרצת קוד הפייתון
     - name: Run Monitor Script
-      env:
-        server: server13.ftpgrid.com       
+      env:    
         server: ${{ secrets.FTP_HOST0 }}
         FTP_USER: ${{ secrets.FTP_USER }}
         FTP_PASS: ${{ secrets.FTP_PASS }}
