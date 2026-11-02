@@ -1,4 +1,4 @@
-name: FTP Monitor
+name: FTP Monitor10
 
 on:
   schedule:
