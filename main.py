@@ -18,7 +18,7 @@ def send_pushover_notification(message):
         print("⚠️ פרטי Pushover חסרים, מדלג על שליחת התראה.")
         return
     
-    url = "https://pushover.net"
+    url = "https://api.pushover.net/1/messages.json"
     data = {
         "token": PUSHOVER_TOKEN,
         "user": PUSHOVER_USER,
