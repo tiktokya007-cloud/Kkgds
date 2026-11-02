@@ -2,7 +2,7 @@ name: FTP Monitor10
 
 on:
   schedule:
-    - cron: '*/2 * * * *' # רץ כל 2 דקות (או שולט לפי מה שהגדרת ב-cron)
+    - cron: '*/2 * * * *' # Runs every 2 minutes
   workflow_dispatch:
 
 jobs:
@@ -25,9 +25,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: seen_files_cache.txt
-          key: ftp-cache-${{ github.run_id }}
+          key: ftp-cache-v1-fixed-key
           restore-keys: |
-            ftp-cache-
+            ftp-cache-v1-
 
       - name: Run FTP Monitor Script
         env:
