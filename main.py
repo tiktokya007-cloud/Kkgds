@@ -40,7 +40,7 @@ def get_ftp_files_from_dynamic_path():
     current_hour = now.strftime("%H")       # לדוגמה: 21
     
     # בניית הנתיב הדינמי בצורה אוטומטית
-    target_dir = f"/maintenance/192.168.1.246_00124275e927/{current_date}/{current_hour}/pic"
+    target_dir = f"/maintenance/192.168.1.246_00124275e927/{current_date}/4/pic"
     
     print(f"🔄 מתחבר לשרת {FTP_HOST}...")
     with FTP(FTP_HOST) as ftp:
