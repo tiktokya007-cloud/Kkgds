@@ -2,7 +2,7 @@ name: FTP Monitor10
 
 on:
   schedule:
-    - cron: '*/2 * * * *' # רץ כל 10 דקות (או לפי מה שהגדרת)
+    - cron: '*/2 * * * *' # רץ כל 2 דקות (או שולט לפי מה שהגדרת ב-cron)
   workflow_dispatch:
 
 jobs:
@@ -21,7 +21,6 @@ jobs:
         run: |
           pip install requests
 
-‎      # הוספת שמירת הקאש בין ריצות של GitHub Actions
       - name: Cache seen files
         uses: actions/cache@v4
         with:
