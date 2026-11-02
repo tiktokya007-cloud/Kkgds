@@ -10,14 +10,14 @@ FTP_PASS = os.environ.get('FTP_PASS', '')
 PUSHOVER_USER = os.environ.get('PUSHOVER_USER_KEY')
 PUSHOVER_TOKEN = os.environ.get('PUSHOVER_API_TOKEN')
 
-CACHE_FILE = "ftp_snapshot.txt"
+CACHE_FILE = "seen_files_cache.txt"
 
 def send_pushover_notification(message):
     """פונקציה לשליחת התראה ל-Pushover"""
     if not PUSHOVER_USER or not PUSHOVER_TOKEN:
         print("⚠️ פרטי Pushover חסרים, מדלג על שליחת התראה.")
         return
-    
+     
     url = "https://api.pushover.net/1/messages.json"
     data = {
         "token": PUSHOVER_TOKEN,
@@ -33,13 +33,9 @@ def send_pushover_notification(message):
 
 def get_ftp_files_from_dynamic_path():
     """התחברות ל-FTP, ניווט לתיקייה הדינמית ושליפת רשימת הקבצים"""
+    now = datetime.utcnow()
+    current_date = now.strftime("%Y-%m-%d")
     
-    # הפקת התאריך והשעה הנוכחיים לפי הפורמט בנתיב שלך
-    now = datetime.utcnow() # GitHub Actions רץ לפי שעון UTC
-    current_date = now.strftime("%Y-%m-%d") # לדוגמה: 2026-11-01
-    current_hour = now.strftime("%H")       # לדוגמה: 21
-    
-    # בניית הנתיב הדינמי בצורה אוטומטית
     target_dir = f"/maintenance/192.168.1.246_00124275e927/{current_date}/04/pic"
     
     print(f"🔄 מתחבר לשרת {FTP_HOST}...")
@@ -52,45 +48,44 @@ def get_ftp_files_from_dynamic_path():
             files = ftp.nlst()
             return sorted(files), target_dir
         except Exception as e:
-            # אם התיקייה עדיין לא נוצרה בשעה הזו על ידי המכשיר, נתפוס את השגיאה בעדינות
             print(f"ℹ️ התיקייה {target_dir} עדיין לא קיימת בשרת. שגיאה: {e}")
             return [], target_dir
 
 def main():
     try:
-        # 1. קבלת רשימת הקבצים מהנתיב הדינמי
         current_files, target_dir = get_ftp_files_from_dynamic_path()
         if not current_files:
             print("📭 התיקייה ריקה או לא קיימת, אין מה לנטר כרגע.")
             return
 
-        current_snapshot = "\n".join(current_files)
-        
-        # 2. בדיקה האם קיים מצב קודם (Cache)
+        # טעינת קבצים שכבר ראינו בעבר (מתוך הקאש)
+        seen_files = set()
         if os.path.exists(CACHE_FILE):
             with open(CACHE_FILE, "r", encoding="utf-8") as f:
-                previous_snapshot = f.read()
-            
-            # 3. השוואה בין המצב הקודם לנוכחי
-            if current_snapshot != previous_snapshot:
-                print("⚠️ נמצא שינוי בתיקייה!")
-                
-                previous_files = previous_snapshot.splitlines() if previous_snapshot else []
-                added = [f for f in current_files if f not in previous_files]
-                
-                if added:
-                    msg = f"➕ התווספו {len(added)} תמונות חדשות בנתיב:\n{target_dir}\n\nקבצים: {', '.join(added[:5])}"
-                    if len(added) > 5:
-                        msg += f" ועוד {len(added)-5} קבצים..."
-                    send_pushover_notification(msg)
-            else:
-                print("✅ אין שינוי בקבצים מאז הבדיקה האחרונה.")
-        else:
-            print("ℹ️ ריצה ראשונה בשעה זו. שומר מצב ראשוני ומדלג על התראה.")
+                seen_files = set(line.strip() for line in f if line.strip())
 
-        # 4. שמירת המצב הנוכחי לריצה הבאה
+        # أיתור קבצים חדשים לחלוטין שלא ראינו מעולם
+        # נשמור גם את שם התיקייה יחד עם שם הקובץ כדי למנוע התנגשויות בין ימים/תיקיות שונים
+        new_files = []
+        for file in current_files:
+            file_identifier = f"{target_dir}/{file}"
+            if file_identifier not in seen_files:
+                new_files.append(file)
+                seen_files.add(file_identifier)
+
+        if new_files:
+            print(f"⚠️ נמצאו {len(new_files)} קבצים חדשים!")
+            msg = f"➕ התווספו {len(new_files)} תמונות חדשות בנתיב:\n{target_dir}\n\nקבצים: {', '.join(new_files[:5])}"
+            if len(new_files) > 5:
+                msg += f" ועוד {len(new_files)-5} קבצים..."
+            send_pushover_notification(msg)
+        else:
+            print("✅ אין קבצים חדשים מאז הבדיקה האחרונה.")
+
+        # שמירת כל הקבצים שראינו עד כה בחזרה לקאש
         with open(CACHE_FILE, "w", encoding="utf-8") as f:
-            f.write(current_snapshot)
+            for item in sorted(seen_files):
+                f.write(f"{item}\n")
 
     except Exception as e:
         print(f"❌ שגיאה בתהליך: {e}")
