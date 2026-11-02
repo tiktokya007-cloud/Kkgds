@@ -3,8 +3,8 @@ name: FTP Monitor108
 on:
   schedule:
     - cron: '*/5 * * * *' # Runs every 5 minutes
-    repository_dispatch:
-    types: [run-ftp-monitor]
+  repository_dispatch:
+    types: [run-FTP Monitor108]
   workflow_dispatch:
 
 jobs:
