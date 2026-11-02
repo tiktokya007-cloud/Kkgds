@@ -22,7 +22,7 @@ jobs:
       # 3. הפעלת הסקריפט והעברת ה-Secrets כמשתני סביבה
       - name: Run FTP Connection Script
         env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_HOST: ${{ secrets.FTP_HOST0 }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_TOKEN }}
