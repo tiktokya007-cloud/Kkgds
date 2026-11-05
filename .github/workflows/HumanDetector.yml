@@ -35,4 +35,4 @@ jobs:
         PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
         PUSHOVER_APP_TOKEN: ${{ secrets.PUSHOVER_APP_TOKEN }}
         POLL_INTERVAL: "10"
-      run: python HumanDetector.py # שנה את main.py לשם קובץ ה-Python שלך
+      run: python .github/workflows/HumanDetector.py # שנה את main.py לשם קובץ ה-Python שלך
