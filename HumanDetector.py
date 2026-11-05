@@ -10,7 +10,8 @@ import requests
 FTP_HOST = os.getenv("FTP_HOST0", "yourserver.com")
 FTP_USER = os.getenv("FTP_USER", "your_ftp_username")
 FTP_PASS = os.getenv("FTP_PASS", "your_ftp_password")
-FTP_FOLDER = os.getenv("FTP_FOLDER", "/camera_uploads")  # התיקייה במצלמה
+# שינוי נתיב ברירת המחדל ליחסי (בלי / בהתחלה) כדי למנוע שגיאות 550 ברוב השרתים
+FTP_FOLDER = os.getenv("FTP_FOLDER", "camera_uploads")  
 
 PUSHOVER_USER_KEY = os.getenv("PUSHOVER_USER_KEY", "your_user_key_here")
 PUSHOVER_APP_TOKEN = os.getenv("PUSHOVER_APP_TOKEN", "your_app_token_here")
@@ -30,7 +31,6 @@ class FTPHumanDetector:
 
     def send_pushover(self, message, image_data, filename):
         """Sends an alert to Pushover with an in-memory image buffer."""
-        # תיקון כתובת ה-API של Pushover לשליחת הודעות
         url = "https://api.pushover.net/1/messages.json"
         payload = {
             "token": PUSHOVER_APP_TOKEN,
@@ -49,7 +49,6 @@ class FTPHumanDetector:
 
     def process_image_buffer(self, file_bytes, filename):
         """Decodes image from memory, scans for humans, and handles alerts."""
-        # Convert raw bytes into an OpenCV image matrix
         nparr = np.frombuffer(file_bytes, np.uint8)
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -92,7 +91,19 @@ class FTPHumanDetector:
                 # Establish connection
                 ftp = FTP(FTP_HOST)
                 ftp.login(user=FTP_USER, passwd=FTP_PASS)
-                ftp.cwd(FTP_FOLDER)
+                
+                # מנגנון הגנה מפני שגיאת 550: ניסיון מעבר לתיקייה, ויצירה שלה אם היא חסרה
+                try:
+                    ftp.cwd(FTP_FOLDER)
+                except Exception:
+                    print(f"[!] Folder '{FTP_FOLDER}' not found. Attempting to create it...")
+                    try:
+                        ftp.mkd(FTP_FOLDER)
+                        ftp.cwd(FTP_FOLDER)
+                        print(f"[✓] Successfully created and moved to folder: {FTP_FOLDER}")
+                    except Exception as create_err:
+                        print(f"[✗] Failed to create folder: {create_err}")
+                        raise
 
                 # Get list of files
                 files = []
@@ -108,17 +119,22 @@ class FTPHumanDetector:
                 for filename in images:
                     print(f"[+] Found new file on FTP: {filename}")
 
-                    # Download file directly into RAM buffer
-                    file_buffer = io.BytesIO()
-                    ftp.retrbinary(f"RETR {filename}", file_buffer.write)
-                    file_bytes = file_buffer.getvalue()
+                    try:
+                        # Download file directly into RAM buffer
+                        file_buffer = io.BytesIO()
+                        ftp.retrbinary(f"RETR {filename}", file_buffer.write)
+                        file_bytes = file_buffer.getvalue()
 
-                    # Process the downloaded bytes
-                    self.process_image_buffer(file_bytes, filename)
+                        # Process the downloaded bytes
+                        self.process_image_buffer(file_bytes, filename)
 
-                    # Delete the file from FTP so we don't scan it again next loop
-                    ftp.delete(filename)
-                    print(f"[+] Removed {filename} from FTP server.")
+                        # Delete the file from FTP so we don't scan it again next loop
+                        ftp.delete(filename)
+                        print(f"[+] Removed {filename} from FTP server.")
+                    except Exception as file_err:
+                        print(f"[✗] Error handling file {filename}: {file_err}")
+                        # ממשיך לקובץ הבא גם אם קובץ ספציפי נכשל (למשל אם הוא עדיין נכתב ע"י המצלמה)
+                        continue
 
                 ftp.quit()
 
