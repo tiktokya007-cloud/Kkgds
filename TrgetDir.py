@@ -1,7 +1,6 @@
 import os
 import ftplib
 import requests
-import secrets  # שימוש במודול secrets לאבטחה/ניהול במידת הצורך
 
 # הגדרת קובץ ה-Cache ושם התיקייה לניטור
 CACHE_FILE = "seen_files_cache.txt"
@@ -31,7 +30,7 @@ def save_seen_files(seen_files):
 
 def send_pushover_notification(filename):
     """שליחת התראה לפושאובר על קובץ חדש"""
-    url = "https://pushover.net"
+    url = "https://api.pushover.net/1/messages.json"
     data = {
         "token": PUSHOVER_API_TOKEN,
         "user": PUSHOVER_USER_KEY,
