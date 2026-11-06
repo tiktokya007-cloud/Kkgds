@@ -34,4 +34,4 @@ jobs:
           FTP_PASS: ${{ secrets.FTP_PASS }}
           FTP_WATCH_DIR: ${{ secrets.FTP_WATCH_DIR }}
         run: |
-          python sftp_watcher.py
+          python sftp_watcher0.py
