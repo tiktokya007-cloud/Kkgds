@@ -1,4 +1,4 @@
-name: FTP Folder Watcher
+name: SFTP Folder Watcher
 
 on:
   schedule:
