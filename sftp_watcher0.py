@@ -18,7 +18,6 @@ def save_state(seen_files):
         json.dump(list(seen_files), f)
 
 def watch_ftp_folder():
-    # Load configuration from environment variables (injected by GitHub Actions)
     host = os.environ.get("FTP_HOST")
     port = int(os.environ.get("FTP_PORT", 21))
     user = os.environ.get("FTP_USER")
@@ -34,10 +33,8 @@ def watch_ftp_folder():
     ftp.login(user, password)
     ftp.cwd(remote_dir)
 
-    # List files in the remote directory
     current_files = ftp.nlst()
     
-    # Filter out directories (. and ..) and files we've already seen
     new_files = [f for f in current_files if f not in seen_files and f not in ('.', '..')]
 
     if not new_files:
@@ -46,10 +43,8 @@ def watch_ftp_folder():
         print(f"[+] Found {len(new_files)} new file(s):")
         for filename in new_files:
             print(f"    - {filename}")
-            # Mark as seen
             seen_files.add(filename)
 
-        # Save the updated state so we don't alert on these files again next time
         save_state(seen_files)
 
     ftp.quit()
