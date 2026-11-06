@@ -1,0 +1,44 @@
+name: FTP Folder Watcher
+
+on:
+  schedule:
+    # Runs every 30 minutes. (Note: GitHub cron schedules can sometimes be delayed by a few minutes)
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows you to trigger it manually from the GitHub UI
+
+jobs:
+  watch-ftp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Restore watcher state cache
+        uses: actions/cache@v4
+        with:
+          path: .watcher_state.json
+          key: ftp-watcher-state-${{ github.run_id }}
+          restore-keys: |
+            ftp-watcher-state-
+
+      - name: Run FTP Watcher Script
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST0 }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_WATCH_DIR: ${{ secrets.FTP_WATCH_DIR }}
+        run: |
+          python sftp_watcher.py
+
+      - name: Upload downloaded files as an artifact (Optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: newly-downloaded-ftp-files
+          path: downloaded_files/
+          if-no-files-found: ignore
