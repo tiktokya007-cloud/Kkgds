@@ -29,7 +29,7 @@ jobs:
 
       - name: Run FTP Watcher Script
         env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_HOST: ${{ secrets.FTP_HOST0 }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASS: ${{ secrets.FTP_PASS }}
           FTP_WATCH_DIR: ${{ secrets.FTP_WATCH_DIR }}
