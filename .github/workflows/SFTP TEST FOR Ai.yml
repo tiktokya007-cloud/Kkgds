@@ -1,0 +1,39 @@
+name: SFTP Folder Watcher0
+
+on:
+  schedule:
+    # Runs every 30 minutes
+    - cron: '*/2 * * * *'
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+jobs:
+  watch-ftp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Restore watcher state cache
+        uses: actions/cache@v4
+        with:
+          path: .watcher_state.json
+          key: ftp-watcher-state-${{ github.run_id }}
+          restore-keys: |
+            ftp-watcher-state-
+
+      - name: Run FTP Watcher Script
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST0 }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_WATCH_DIR: ${{ secrets.FTP_WATCH_DIR }}
+          PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY }}
+          PUSHOVER_API_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN }}
+        run: |
+          python sftp_watcher0.py
